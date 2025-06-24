@@ -23,6 +23,7 @@ namespace familytree_api.Repositories.User
 
             List<UserOutputDto> familyMembers = await _context.FamilyMember
                 .Where(fm => fm.FamilyId == filter.FamilyId)
+                .Where(fm => fm.ShowInTree == false)
                 .Include(fm => fm.User)
                 .Skip(skip)
                 .Take(filter.Limit)
@@ -36,7 +37,9 @@ namespace familytree_api.Repositories.User
                         Gender = fms.Gender ?? "",
                         Phone = fms.User !=null ? fms.User.PhoneNumber ?? string.Empty : string.Empty,
                         Email = fms.User !=null ? fms.User.Email ?? string.Empty : string.Empty,
-                        CreatedAt = fms.CreatedAt,
+                        Password = "",
+                        Role = fms.User != null ? fms.User.Role ?? string.Empty : string.Empty,
+                    CreatedAt = fms.CreatedAt,
 
                 })
                 .ToListAsync();

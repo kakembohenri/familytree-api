@@ -102,6 +102,7 @@ namespace familytree_api.Services.Family
                     LastName = body.LastName,
                     Role = UserRoles.Viewer.ToString(),
                     Email = body.Email,
+                    PhoneNumber = body.Phone,
                     CreatedAt = DateTime.Now
                 };
 
@@ -117,6 +118,9 @@ namespace familytree_api.Services.Family
                     Died = body.Died,
                     FatherId = body.FatherId,
                     MotherId = body.MotherId,
+                    PlaceOfBirth = body.PlaceOfBirth,
+                    Occupation = body.Occupation,
+                    Bio = body.Bio,
                     Gender = body.Gender,
                     ShowInTree = true,
                     CreatedAt = body.CreatedAt
@@ -152,6 +156,9 @@ namespace familytree_api.Services.Family
                 familyMember.Born = body.Born;
                 familyMember.Died = body.Died;
                 familyMember.Gender = body.Gender;
+                familyMember.PlaceOfBirth = body.PlaceOfBirth;
+                familyMember.Occupation = body.Occupation;
+                familyMember.Bio = body.Bio;
 
                 await _familyMemberRepository.Update(familyMember);
 
@@ -246,30 +253,52 @@ namespace familytree_api.Services.Family
 
             // Display images and find if bookmarked by current user
 
-            images.Select(i =>
-            {
-                i.Path = $"https://localhost:7241/uploads/{i.Path}";
-                return i;
-            }).ToList();
+            Image? parentAvatar = null;
+            List<Image> parentImages = [];
 
+            foreach (var i in images)
+            {
+                i.Path = $"https://localhost:7025/uploads/{i.Path}";
+                if (i.Type == "avatar")
+                {
+                    parentAvatar = i;
+                }
+                else
+                {
+                parentImages.Add(i);
+                }
+            }
+           
             foreach (var partner in partners)
             {
                 var partnerFm = await _familyMemberRepository.Find(partner.WifeId);
                 var partnerImages = await _fileRepository.List(partner.WifeId);
 
                 // Display images and find if bookmarked by current user
+                Image? partnerAvatar = null;
 
-                partnerImages.Select(i =>
+                List<Image> selectedPartnerImages = [];
+
+                foreach (var i in partnerImages)
                 {
-                    i.Path = $"https://localhost:7241/uploads/{i.Path}";
-                    return i;
-                }).ToList();
+                    i.Path = $"https://localhost:7025/uploads/{i.Path}";
+                    if (i.Type == "avatar")
+                    {
+                        partnerAvatar = i;
+                    }
+                    else
+                    {
+                        selectedPartnerImages.Add(i);
+                    }
+                }
 
                 var partnerToDto = ToUserDto(partnerFm!);
-                partnerToDto.Images = partnerImages;
+                partnerToDto.Images = selectedPartnerImages;
                 partnerToDto.Married = partner.Married;
                 partnerToDto.Divorced = partner.Divorced;
                 partnerToDto.PartnerId = partner.Id;
+                partnerToDto.PartnerName = $"{member?.User?.FirstName ?? ""} {member?.User?.MiddleName ?? ""} {member?.User?.LastName ?? ""}";
+                partnerToDto.Avatar = partnerAvatar;
 
                 partnerDtos.Add(partnerToDto);
             }
@@ -277,12 +306,19 @@ namespace familytree_api.Services.Family
             var node = new TreeOutputDto
             {
                 Id = memberId,
+                Avatar = parentAvatar,
                 FirstName = member?.User?.FirstName ?? "",
                 MiddleName = member?.User?.MiddleName ?? "",
                 LastName = member?.User?.LastName ?? "",
                 FamilyId = member?.FamilyId ?? 0,
+                Occupation = member?.Occupation ?? "",
+                PlaceOfBirth = member?.PlaceOfBirth ?? "",
+                Bio = member?.Bio ?? "",
                 Partners = partnerDtos,
-                Images = images,
+                Email = member?.User?.Email ?? "",
+                Phone = member?.User?.PhoneNumber ?? "",
+                Images = parentImages,
+                Gender = member?.Gender ?? "",
                 ShowInTree = true,
                 Children = new List<TreeOutputDto>(),
                 Born = member?.Born ?? "",
@@ -291,6 +327,7 @@ namespace familytree_api.Services.Family
                 MotherId = member?.MotherId,
                 CreatedAt = member?.CreatedAt ?? DateTime.Now,
             };
+
 
             // Get children of this partnership
             var children = await _familyMemberRepository.GetChildren(memberId, null);
@@ -312,22 +349,39 @@ namespace familytree_api.Services.Family
 
                     // Display images and find if bookmarked by current user
 
-                    childImages.Select(i =>
+                    Image? childAvatar = null;
+
+                    List<Image> selectedChildImages = [];
+
+                    foreach (var i in childImages)
                     {
-                        i.Path = $"https://localhost:7241/uploads/{i.Path}";
-                        return i;
-                    }).ToList();
+                        i.Path = $"https://localhost:7025/uploads/{i.Path}";
+                        if (i.Type == "avatar")
+                        {
+                            childAvatar = i;
+                        }
+                        else
+                        {
+                            selectedChildImages.Add(i);
+                        }
+                    }
 
                     var childNode = new TreeOutputDto
                     {
                         Id = child.Id,
+                        Avatar = childAvatar,
                         FirstName = child?.User?.FirstName ?? "",
                         MiddleName = child?.User?.MiddleName ?? "",
                         LastName = child?.User?.LastName ?? "",
                         FamilyId = child?.FamilyId ?? 0,
-
+                        Occupation = child?.Occupation ?? "",
+                        PlaceOfBirth = child?.PlaceOfBirth ?? "",
+                        Bio = child?.Bio ?? "",
                         ShowInTree = child?.ShowInTree ?? true,
-                        Images = childImages,
+                        Images = selectedChildImages,
+                        Email = child?.User?.Email ?? "",
+                        Gender = child?.Gender ??   "",
+                        Phone = child?.User?.PhoneNumber ?? "",
                         Born = child?.Born ?? "",
                         Died = child?.Died,
                         FatherId = child?.FatherId, 
@@ -357,6 +411,11 @@ namespace familytree_api.Services.Family
                 Gender = member?.Gender ?? "",
                 Born = member?.Born ?? "",
                 Died = member?.Died,
+                Email = member?.User?.Email ?? "",
+                Phone = member?.User?.PhoneNumber ?? "",
+                Occupation = member?.Occupation ?? "",
+                PlaceOfBirth = member?.PlaceOfBirth ?? "",
+                Bio = member?.Bio ??    "",
                 FatherId = member?.FatherId,
                 MotherId = member?.MotherId, 
                 CreatedAt = member?.CreatedAt ?? DateTime.Now,

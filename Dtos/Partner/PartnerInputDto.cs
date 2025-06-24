@@ -8,5 +8,6 @@ namespace familytree_api.Dtos.Partner
         public int WifeId { get; set; }
         public string Married { get; set; } = string.Empty;
         public string? Divorced { get; set; }
+
     }
 }

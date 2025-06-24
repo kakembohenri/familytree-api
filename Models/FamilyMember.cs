@@ -43,6 +43,15 @@ namespace familytree_api.Models
         [Column("gender")]
         public string? Gender { get; set; }
 
+        [Column("place_of_birth")]
+        public string PlaceOfBirth { get; set; } = string.Empty;
+
+        [Column("occupation")]
+        public string Occupation { get; set; } = string.Empty;
+
+        [Column("bio")]
+        public string Bio { get; set; } = string.Empty; 
+
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
 

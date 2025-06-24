@@ -1,4 +1,5 @@
 ﻿
+using familytree_api.Database;
 using familytree_api.Dtos.Family;
 using familytree_api.Models;
 using familytree_api.Repositories.File;
@@ -6,7 +7,8 @@ using familytree_api.Repositories.File;
 namespace familytree_api.Services.Files
 {
     public class FileService(
-        IFileRepository _fileRepository
+        IFileRepository _fileRepository,
+        IUnitOfWork _unitOfWork
         ) : IFileService
     {
 
@@ -14,6 +16,7 @@ namespace familytree_api.Services.Files
 
         public async Task UploadFile(FileInputDto body)
         {
+            await _unitOfWork.BeginTransactionAsync();
             var file = body.File;
             int familyMemberId = body.FamilyMemberId;
 
@@ -28,6 +31,7 @@ namespace familytree_api.Services.Files
                 Image newFile = new()
                 {
                     Path = newFileName,
+                    Type = body.Type,
                     FamilyMemberId = familyMemberId,
                     CreatedAt = DateTime.Now,
                 };
@@ -40,9 +44,19 @@ namespace familytree_api.Services.Files
                     await file.CopyToAsync(stream);
                 }
 
+                // if oldfile is not zero i.e is provided, delte it
+
+                if(body.OldAvatar != 0)
+                {
+                    await RemoveFile(body.OldAvatar);
+                }
+
+                await _unitOfWork.CommitAsync();
             }
             catch
             {
+                await _unitOfWork.RollbackAsync();
+
                 DeleteFile(Path.Combine(_uploadPath, newFileName));
 
                 throw;

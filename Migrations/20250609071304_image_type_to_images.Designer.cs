@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using familytree_api.Database;
 
@@ -11,9 +12,11 @@ using familytree_api.Database;
 namespace familytree_api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250609071304_image_type_to_images")]
+    partial class image_type_to_images
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -59,11 +62,6 @@ namespace familytree_api.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Bio")
-                        .IsRequired()
-                        .HasColumnType("longtext")
-                        .HasColumnName("bio");
-
                     b.Property<string>("Born")
                         .IsRequired()
                         .HasColumnType("longtext")
@@ -92,16 +90,6 @@ namespace familytree_api.Migrations
                     b.Property<int?>("MotherId")
                         .HasColumnType("int")
                         .HasColumnName("mother_id");
-
-                    b.Property<string>("Occupation")
-                        .IsRequired()
-                        .HasColumnType("longtext")
-                        .HasColumnName("occupation");
-
-                    b.Property<string>("PlaceOfBirth")
-                        .IsRequired()
-                        .HasColumnType("longtext")
-                        .HasColumnName("place_of_birth");
 
                     b.Property<bool>("ShowInTree")
                         .HasColumnType("tinyint(1)")

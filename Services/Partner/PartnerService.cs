@@ -52,7 +52,10 @@ namespace familytree_api.Services.Partner
                     Died = body.Died,
                     Gender = body.Gender,
                     ShowInTree = true,
-                    CreatedAt = body.CreatedAt
+                    CreatedAt = body.CreatedAt,
+                    PlaceOfBirth = body.PlaceOfBirth,
+                    Occupation = body.Occupation,
+                    Bio = body.Bio,
                 };
 
                 await _familyMemberRepository.Create(familyMember);

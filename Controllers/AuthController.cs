@@ -84,8 +84,8 @@ namespace familytree_api.Controllers
             {
                 var result = await _authService.PasswordResetTokenExists(body);
 
-                return Ok(new ApiResponse<bool>(data: result, message: result ? "Token is valid!": "Token is invalid",
-                    statusCode: (int)HttpStatusCode.OK));
+                return Ok(new ApiResponse<bool>(data: result, message: result ? "Token is valid!" : "Token is invalid",
+                    statusCode: result ? (int)HttpStatusCode.OK : (int)HttpStatusCode.BadRequest));
             }
             catch (Exception ex)
             {

@@ -20,6 +20,10 @@ namespace familytree_api.Models
 
         public FamilyMember? FamilyMember { get; set; }
 
+        [Column("type")]
+        public string Type { get; set; } = string.Empty;
+
+
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
     }

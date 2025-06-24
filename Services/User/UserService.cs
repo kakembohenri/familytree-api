@@ -74,7 +74,7 @@ namespace familytree_api.Services.User
                     UserId = user.Id,
                     FamilyId = loggedInUser.FamilyId,
                     Gender = body.Gender,
-                    ShowInTree = true,
+                    ShowInTree = false,
                     CreatedAt = body.CreatedAt
                 };
 

@@ -4,13 +4,26 @@ using familytree_api.Dtos.AppSettings;
 using familytree_api.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
+using Org.BouncyCastle.Asn1.X509;
 using System;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        policy => policy
+        .WithOrigins("http://localhost:3000", "http://localhost:3001")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+    .AllowCredentials());
+});
+
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
@@ -74,9 +87,19 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
+
+var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+
+if (Directory.Exists(fullPath)) // Check if folder exists
+{
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(fullPath),
+        RequestPath = "/uploads",
+        ServeUnknownFileTypes = true // Optional: allows serving any file type
+    });
+}
 
 app.Run();

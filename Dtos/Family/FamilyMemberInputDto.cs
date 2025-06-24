@@ -8,6 +8,10 @@
         public string? Email{ get; set; }
         public int FamilyId { get; set; }
         public string Born { get; set; } = string.Empty;
+        public string PlaceOfBirth { get; set; } = string.Empty;
+        public string Occupation { get; set; } = string.Empty;
+        public string Bio { get; set; } = string.Empty;
+        public string? Phone { get; set; } = string.Empty;
         public string? Died { get; set; }
         public int? FatherId { get; set; }
         public int? MotherId { get; set; }
