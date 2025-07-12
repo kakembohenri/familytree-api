@@ -6,22 +6,28 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
-using Org.BouncyCastle.Asn1.X509;
-using System;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var corsOrigins = builder.Configuration["CorsOrigins"]?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(
-        policy => policy
-        .WithOrigins("http://localhost:3000", "http://localhost:3001")
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-    .AllowCredentials());
+        policy =>
+        {
+            if (corsOrigins != null && corsOrigins.Length > 0)
+            {
+                policy.WithOrigins(corsOrigins)
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials();
+            }
+
+        });
 });
 
 
