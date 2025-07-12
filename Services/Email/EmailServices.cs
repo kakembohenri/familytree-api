@@ -31,7 +31,7 @@ namespace familytree_api.Services.Email
                 //    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
                 //}
 
-                await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port,  SecureSocketOptions.StartTls);
+                await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port,  SecureSocketOptions.SslOnConnect);
                 await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
 
                 // Create the email message
