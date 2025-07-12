@@ -44,8 +44,8 @@ namespace familytree_api.Services.Email
 
                     var jsonContent = new StringContent(JsonSerializer.Serialize(emailRequest), Encoding.UTF8, "application/json");
 
-                //await _httpClient.PostAsync("https://familytree-ui.vercel.app/api/send-email", jsonContent);
-                await _httpClient.PostAsync("http://localhost:3000/api/send-email", jsonContent);
+                await _httpClient.PostAsync($"{_frontEndURL.Url}/api/send-email", jsonContent);
+                //await _httpClient.PostAsync("http://localhost:3000/api/send-email", jsonContent);
 
                 //}
                 //else
@@ -60,7 +60,7 @@ namespace familytree_api.Services.Email
                 //message.To.Add(new MailboxAddress(email.To, email.To));
                 //message.Subject = email.Subject;
 
-               
+
 
                 //// Set the email body to the HTML content
                 //message.Body = new TextPart("html") { Text = htmlContent };
