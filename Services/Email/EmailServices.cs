@@ -7,80 +7,62 @@ using MimeKit;
 
 namespace familytree_api.Services.Email
 {
-    public class EmailServices(IOptions<SmtpConfig> smtpConfig, IOptions<FrontEndUrl> frontEndURL, IWebHostEnvironment env, ILogger logger) : IEmailServices
+    public class EmailServices(IOptions<SmtpConfig> smtpConfig, IOptions<FrontEndUrl> frontEndURL, IWebHostEnvironment env) : IEmailServices
     {
         private readonly SmtpConfig _smtpConfig = smtpConfig.Value;
         private readonly FrontEndUrl _frontEndURL = frontEndURL.Value;
         private readonly IWebHostEnvironment _env = env;
-        private readonly ILogger _logger = logger;
 
-             public async Task SendEmailVerfication(EmailMessage email)
+        public async Task SendEmailVerfication(EmailMessage email)
         {
             try
             {
                 using var smtp = new SmtpClient();
 
-                SecureSocketOptions socketOption;
-                if (_env.IsProduction())
-                {
-                    socketOption = _smtpConfig.EnableTls ? SecureSocketOptions.StartTls : SecureSocketOptions.SslOnConnect;
-                    _logger.LogInformation("Connecting to SMTP in Production mode with {SocketOption}", socketOption);
-                }
-                else
-                {
-                    socketOption = SecureSocketOptions.None;
-                    _logger.LogInformation("Connecting to SMTP in Development mode (no encryption)");
-                }
+                // Connect to the Mailpit SMTP server
+                //if (_env.IsProduction())
+                //{
+                //    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, _smtpConfig.EnableTls ? SecureSocketOptions.StartTls : SecureSocketOptions.SslOnConnect);
+                //    await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
+                //}
+                //else
+                //{
+                //    // Local development: use MailPit, Papercut, or log the email
+                //    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
+                //}
 
-                await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, socketOption);
+                await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port,  SecureSocketOptions.StartTls);
+                await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
 
-                if (_env.IsProduction())
-                {
-                    await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
-                    _logger.LogInformation("Authenticated to SMTP as {Username}", _smtpConfig.UserName);
-                }
-
+                // Create the email message
                 var message = new MimeMessage();
                 message.From.Add(new MailboxAddress(_smtpConfig.FromName, _smtpConfig.From));
                 message.To.Add(new MailboxAddress(email.To, email.To));
                 message.Subject = email.Subject;
 
                 var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Dtos", "Emails", "WelcomeEmail.html");
-                if (!File.Exists(filePath))
-                {
-                    _logger.LogError("Email template not found at {Path}", filePath);
-                    return;
-                }
+                // Read the HTML template
+                var htmlContent = File.ReadAllText(filePath);
 
-                var htmlContent = await File.ReadAllTextAsync(filePath);
-                htmlContent = htmlContent.Replace("{{client}}", email.Name)
-                                         .Replace("{{validation_endpoint}}", $"{_frontEndURL.Url}/verify-email?token={email.ValidationToken}&email={email.To}");
+                // Replace placeholders with dynamic content
+                htmlContent = htmlContent.Replace("{{client}}", email.Name); // Replace with actual user name
+                htmlContent = htmlContent.Replace("{{validation_endpoint}}", $"{_frontEndURL.Url}/verify-email?token={email.ValidationToken}&email={email.To}"); // Replace with actual link
 
+                // Set the email body to the HTML content
                 message.Body = new TextPart("html") { Text = htmlContent };
 
+                // Send the email
                 await smtp.SendAsync(message);
+
+                // Disconnect from the SMTP server
                 await smtp.DisconnectAsync(true);
-
-                _logger.LogInformation("Email sent successfully to {Recipient}", email.To);
-            }
-            catch (SmtpCommandException ex)
-            {
-                _logger.LogError(ex, "SMTP command error while sending email to {Recipient}. Status: {StatusCode}", email.To, ex.StatusCode);
-                throw;
-            }
-            catch (SmtpProtocolException ex)
-            {
-                _logger.LogError(ex, "SMTP protocol error while sending email to {Recipient}", email.To);
-                throw;
-
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error while sending email to {Recipient}", email.To);
-                throw;
-
+                Console.WriteLine(ex.ToString());
             }
         }
+
 
         public async Task ResetPasswordEmail(EmailMessage email)
         {
