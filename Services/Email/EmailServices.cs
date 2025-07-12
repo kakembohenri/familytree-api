@@ -7,20 +7,29 @@ using MimeKit;
 
 namespace familytree_api.Services.Email
 {
-    public class EmailServices(IOptions<SmtpConfig> smtpConfig, IOptions<FrontEndUrl> frontEndURL) : IEmailServices
+    public class EmailServices(IOptions<SmtpConfig> smtpConfig, IOptions<FrontEndUrl> frontEndURL, IWebHostEnvironment env) : IEmailServices
     {
         private readonly SmtpConfig _smtpConfig = smtpConfig.Value;
         private readonly FrontEndUrl _frontEndURL = frontEndURL.Value;
+        private readonly IWebHostEnvironment _env = env;
 
         public async Task SendEmailVerfication(EmailMessage email)
         {
             try
             {
-
                 using var smtp = new SmtpClient();
 
                 // Connect to the Mailpit SMTP server
-                await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
+                if (_env.IsProduction())
+                {
+                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.SslOnConnect);
+                    await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
+                }
+                else
+                {
+                    // Local development: use MailPit, Papercut, or log the email
+                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
+                }
 
                 // Create the email message
                 var message = new MimeMessage();
@@ -34,7 +43,7 @@ namespace familytree_api.Services.Email
 
                 // Replace placeholders with dynamic content
                 htmlContent = htmlContent.Replace("{{client}}", email.Name); // Replace with actual user name
-                htmlContent = htmlContent.Replace("{{validation_endpoint}}", $"{_frontEndURL.Url}/auth/verify-email?token={email.ValidationToken}&email={email.To}"); // Replace with actual link
+                htmlContent = htmlContent.Replace("{{validation_endpoint}}", $"{_frontEndURL.Url}/verify-email?token={email.ValidationToken}&email={email.To}"); // Replace with actual link
 
                 // Set the email body to the HTML content
                 message.Body = new TextPart("html") { Text = htmlContent };
@@ -59,7 +68,16 @@ namespace familytree_api.Services.Email
                 using var smtp = new SmtpClient();
 
                 // Connect to the Mailpit SMTP server
-                await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
+                if (_env.IsProduction())
+                {
+                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.SslOnConnect);
+                    await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
+                }
+                else
+                {
+                    // Local development: use MailPit, Papercut, or log the email
+                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
+                }
 
                 // Create the email message
                 var message = new MimeMessage();
@@ -73,7 +91,7 @@ namespace familytree_api.Services.Email
 
                 // Replace placeholders with dynamic content
                 htmlContent = htmlContent.Replace("{{client}}", email.Name); // Replace with actual user name
-                htmlContent = htmlContent.Replace("{{url}}", $"{_frontEndURL.Url}/auth/verify-password-reset?token={email.ValidationToken}&email={email.To}"); // Replace with actual link
+                htmlContent = htmlContent.Replace("{{url}}", $"{_frontEndURL.Url}/verify-password-reset?token={email.ValidationToken}&email={email.To}"); // Replace with actual link
 
                 // Set the email body to the HTML content
                 message.Body = new TextPart("html") { Text = htmlContent };
@@ -98,7 +116,16 @@ namespace familytree_api.Services.Email
                 using var smtp = new SmtpClient();
 
                 // Connect to the Mailpit SMTP server
-                await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
+                if (_env.IsProduction())
+                {
+                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.SslOnConnect);
+                    await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
+                }
+                else
+                {
+                    // Local development: use MailPit, Papercut, or log the email
+                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
+                }
 
                 // Create the email message
                 var message = new MimeMessage();
@@ -140,7 +167,16 @@ namespace familytree_api.Services.Email
                 using var smtp = new SmtpClient();
 
                 // Connect to the Mailpit SMTP server
-                await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
+                if (_env.IsProduction())
+                {
+                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.SslOnConnect);
+                    await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
+                }
+                else
+                {
+                    // Local development: use MailPit, Papercut, or log the email
+                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
+                }
 
                 // Create the email message
                 var message = new MimeMessage();
