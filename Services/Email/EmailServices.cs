@@ -20,16 +20,19 @@ namespace familytree_api.Services.Email
                 using var smtp = new SmtpClient();
 
                 // Connect to the Mailpit SMTP server
-                if (_env.IsProduction())
-                {
-                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.SslOnConnect);
+                //if (_env.IsProduction())
+                //{
+                //    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.SslOnConnect);
+                //    await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
+                //}
+                //else
+                //{
+                //    // Local development: use MailPit, Papercut, or log the email
+                //    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
+                //}
+
+                await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.SslOnConnect);
                     await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
-                }
-                else
-                {
-                    // Local development: use MailPit, Papercut, or log the email
-                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
-                }
 
                 // Create the email message
                 var message = new MimeMessage();
@@ -68,16 +71,20 @@ namespace familytree_api.Services.Email
                 using var smtp = new SmtpClient();
 
                 // Connect to the Mailpit SMTP server
-                if (_env.IsProduction())
-                {
-                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.SslOnConnect);
-                    await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
-                }
-                else
-                {
-                    // Local development: use MailPit, Papercut, or log the email
-                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
-                }
+                //if (_env.IsProduction())
+                //{
+                //    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.SslOnConnect);
+                //    await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
+                //}
+                //else
+                //{
+                //    // Local development: use MailPit, Papercut, or log the email
+                //    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
+                //}
+
+
+                await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.SslOnConnect);
+                await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
 
                 // Create the email message
                 var message = new MimeMessage();
@@ -116,16 +123,20 @@ namespace familytree_api.Services.Email
                 using var smtp = new SmtpClient();
 
                 // Connect to the Mailpit SMTP server
-                if (_env.IsProduction())
-                {
-                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.SslOnConnect);
-                    await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
-                }
-                else
-                {
-                    // Local development: use MailPit, Papercut, or log the email
-                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
-                }
+                //if (_env.IsProduction())
+                //{
+                //    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.SslOnConnect);
+                //    await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
+                //}
+                //else
+                //{
+                //    // Local development: use MailPit, Papercut, or log the email
+                //    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
+                //}
+
+
+                await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.SslOnConnect);
+                await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
 
                 // Create the email message
                 var message = new MimeMessage();
@@ -167,16 +178,20 @@ namespace familytree_api.Services.Email
                 using var smtp = new SmtpClient();
 
                 // Connect to the Mailpit SMTP server
-                if (_env.IsProduction())
-                {
-                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.SslOnConnect);
-                    await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
-                }
-                else
-                {
-                    // Local development: use MailPit, Papercut, or log the email
-                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
-                }
+                //if (_env.IsProduction())
+                //{
+                //    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.SslOnConnect);
+                //    await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
+                //}
+                //else
+                //{
+                //    // Local development: use MailPit, Papercut, or log the email
+                //    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
+                //}
+
+
+                await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.SslOnConnect);
+                await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
 
                 // Create the email message
                 var message = new MimeMessage();
