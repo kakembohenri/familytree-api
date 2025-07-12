@@ -32,8 +32,8 @@ namespace familytree_api.Services.Email
                 htmlContent = htmlContent.Replace("{{validation_endpoint}}", $"{_frontEndURL.Url}/verify-email?token={email.ValidationToken}&email={email.To}"); // Replace with actual link
 
                 // Connect to the Mailpit SMTP server
-                if (_env.IsProduction())
-                {
+                //if (_env.IsProduction())
+                //{
                     var emailRequest = new
                     {
                         to = email.To,
@@ -45,30 +45,30 @@ namespace familytree_api.Services.Email
 
                     await _httpClient.PostAsync("https://familytree-ui.vercel.app/api/send-email", jsonContent);
 
-                }
-                else
-                {
-                    // Local development: use MailPit, Papercut, or log the email
-                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
+                //}
+                //else
+                //{
+                //    // Local development: use MailPit, Papercut, or log the email
+                //    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
 
 
-                // Create the email message
-                var message = new MimeMessage();
-                message.From.Add(new MailboxAddress(_smtpConfig.FromName, _smtpConfig.From));
-                message.To.Add(new MailboxAddress(email.To, email.To));
-                message.Subject = email.Subject;
+                //// Create the email message
+                //var message = new MimeMessage();
+                //message.From.Add(new MailboxAddress(_smtpConfig.FromName, _smtpConfig.From));
+                //message.To.Add(new MailboxAddress(email.To, email.To));
+                //message.Subject = email.Subject;
 
                
 
-                // Set the email body to the HTML content
-                message.Body = new TextPart("html") { Text = htmlContent };
+                //// Set the email body to the HTML content
+                //message.Body = new TextPart("html") { Text = htmlContent };
 
-                // Send the email
-                await smtp.SendAsync(message);
+                //// Send the email
+                //await smtp.SendAsync(message);
 
-                // Disconnect from the SMTP server
-                await smtp.DisconnectAsync(true);
-                }
+                //// Disconnect from the SMTP server
+                //await smtp.DisconnectAsync(true);
+                //}
 
             }
             catch (Exception ex)
