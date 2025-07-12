@@ -7,12 +7,12 @@ using MimeKit;
 
 namespace familytree_api.Services.Email
 {
-    public class EmailServices(IOptions<SmtpConfig> smtpConfig, IOptions<FrontEndUrl> frontEndURL, IWebHostEnvironment env, ILogger<EmailServices> logger) : IEmailServices
+    public class EmailServices(IOptions<SmtpConfig> smtpConfig, IOptions<FrontEndUrl> frontEndURL, IWebHostEnvironment env, ILogger logger) : IEmailServices
     {
         private readonly SmtpConfig _smtpConfig = smtpConfig.Value;
         private readonly FrontEndUrl _frontEndURL = frontEndURL.Value;
         private readonly IWebHostEnvironment _env = env;
-        private readonly ILogger<EmailServices> _logger = logger;
+        private readonly ILogger _logger = logger;
 
              public async Task SendEmailVerfication(EmailMessage email)
         {
@@ -66,16 +66,21 @@ namespace familytree_api.Services.Email
             catch (SmtpCommandException ex)
             {
                 _logger.LogError(ex, "SMTP command error while sending email to {Recipient}. Status: {StatusCode}", email.To, ex.StatusCode);
+                throw;
             }
             catch (SmtpProtocolException ex)
             {
                 _logger.LogError(ex, "SMTP protocol error while sending email to {Recipient}", email.To);
+                throw;
+
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unexpected error while sending email to {Recipient}", email.To);
+                throw;
+
             }
-}
+        }
 
         public async Task ResetPasswordEmail(EmailMessage email)
         {
