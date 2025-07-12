@@ -17,6 +17,7 @@ namespace familytree_api.Services.Email
         private readonly HttpClient _httpClient = httpClient;
 
 
+
         public async Task SendEmailVerfication(EmailMessage email)
         {
             try
@@ -43,7 +44,8 @@ namespace familytree_api.Services.Email
 
                     var jsonContent = new StringContent(JsonSerializer.Serialize(emailRequest), Encoding.UTF8, "application/json");
 
-                    await _httpClient.PostAsync("https://familytree-ui.vercel.app/api/send-email", jsonContent);
+                //await _httpClient.PostAsync("https://familytree-ui.vercel.app/api/send-email", jsonContent);
+                await _httpClient.PostAsync("http://localhost:3000/api/send-email", jsonContent);
 
                 //}
                 //else

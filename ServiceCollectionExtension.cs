@@ -41,7 +41,8 @@ namespace familytree_api
 
             // Explicitly register the specific services as Singleton or Hosted Service
             services.AddSingleton<IEmailQueue, EmailQueue>();
-            services.AddSingleton<IEmailServices, EmailServices>();
+            //services.AddSingleton<IEmailServices, EmailServices>();
+            services.AddScoped<IEmailServices, EmailServices>();
             services.AddHostedService<EmailWorker>();
 
             services.AddScoped<IEventDispatcher, EventDispatcher>();
