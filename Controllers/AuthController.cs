@@ -17,9 +17,9 @@ namespace familytree_api.Controllers
         {
             try
             {
-                var result = await _authService.SignUp(body);
+                await _authService.SignUp(body);
 
-                return Ok(new ApiResponse<EmailOutput?>(data: result, message: "Signup successfull. We have sent you an email verification token via email inorder to verify you account", 
+                return Ok(new ApiResponse<string>(data: "", message: "Signup successfull. We have sent you an email verification token via email inorder to verify you account", 
                     statusCode: (int)HttpStatusCode.OK));
             }
             catch (Exception ex)

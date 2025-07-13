@@ -5,7 +5,7 @@ namespace familytree_api.Services.Auth
 {
     public interface IAuthService
     {
-        Task<EmailOutput?> SignUp(SignUpDto body);
+        Task SignUp(SignUpDto body);
         Task<string> SignIn(SignInDto body);
         Task<string> ValidateUserAccount(VerifyTokenDto body);
         Task<string> ResetPassword(ResetPasswordDto body);

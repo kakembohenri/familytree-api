@@ -22,7 +22,7 @@ namespace familytree_api.Services.Email
             {
                 using var smtp = new SmtpClient();
 
-                var filePath = Path.Combine(_env.ContentRootPath, "Dtos", "Emails", "WelcomeEmail.html");
+                var filePath = Path.Combine(_env.IsDevelopment() ? Directory.GetCurrentDirectory() : _env.ContentRootPath, "Dtos", "Emails", "WelcomeEmail.html");
                 // Read the HTML template
                 var htmlContent = File.ReadAllText(filePath);
 
@@ -75,7 +75,7 @@ namespace familytree_api.Services.Email
                 // Connect to the Mailpit SMTP server
                 if (_env.IsProduction())
                 {
-                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, _smtpConfig.EnableTls ? SecureSocketOptions.StartTls : SecureSocketOptions.SslOnConnect);
+                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.SslOnConnect);
                     await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
                 }
                 else
@@ -90,7 +90,7 @@ namespace familytree_api.Services.Email
                 message.To.Add(new MailboxAddress(email.To, email.To));
                 message.Subject = email.Subject;
 
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Dtos", "Emails", "ResetPasswordEmail.html");
+                var filePath = Path.Combine(_env.IsDevelopment() ? Directory.GetCurrentDirectory() : _env.ContentRootPath, "Dtos", "Emails", "ResetPasswordEmail.html");
                 // Read the HTML template
                 var htmlContent = File.ReadAllText(filePath);
 
@@ -123,7 +123,7 @@ namespace familytree_api.Services.Email
                 // Connect to the Mailpit SMTP server
                 if (_env.IsProduction())
                 {
-                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, _smtpConfig.EnableTls ? SecureSocketOptions.StartTls : SecureSocketOptions.SslOnConnect);
+                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.SslOnConnect);
                     await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
                 }
                 else
@@ -138,7 +138,7 @@ namespace familytree_api.Services.Email
                 message.To.Add(new MailboxAddress(email.To, email.To));
                 message.Subject = email.Subject;
 
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Dtos", "Emails", "Invitation.html");
+                var filePath = Path.Combine(_env.IsDevelopment() ? Directory.GetCurrentDirectory() : _env.ContentRootPath, "Dtos", "Emails", "Invitation.html");
                 // Read the HTML template
                 var htmlContent = File.ReadAllText(filePath);
 
@@ -174,7 +174,7 @@ namespace familytree_api.Services.Email
                 // Connect to the Mailpit SMTP server
                 if (_env.IsProduction())
                 {
-                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, _smtpConfig.EnableTls ? SecureSocketOptions.StartTls : SecureSocketOptions.SslOnConnect);
+                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.SslOnConnect);
                     await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
                 }
                 else
@@ -189,7 +189,7 @@ namespace familytree_api.Services.Email
                 message.To.Add(new MailboxAddress(email.To, email.To));
                 message.Subject = email.Subject;
 
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Dtos", "Emails", "CredentialsChange.html");
+                var filePath = Path.Combine(_env.IsDevelopment() ? Directory.GetCurrentDirectory() : _env.ContentRootPath, "Dtos", "Emails", "CredentialsChange.html");
                 // Read the HTML template
                 var htmlContent = File.ReadAllText(filePath);
 

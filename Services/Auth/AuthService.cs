@@ -23,9 +23,7 @@ namespace familytree_api.Services.Auth
         IFamilyService _familyService,
         IJwtService _jwtService,
         IHttpContextAccessor _httpContextAccessor,
-        IFamilyMemberRepository _familyMemberRepository,
-        IOptions<FrontEndUrl> _frontEndURL,
-        IWebHostEnvironment _env
+        IFamilyMemberRepository _familyMemberRepository
         ) : IAuthService
     {
      
@@ -35,7 +33,7 @@ namespace familytree_api.Services.Auth
          * Create a token and send it to the user for account verification
          */
 
-        public async Task<EmailOutput?> SignUp(SignUpDto body)
+        public async Task SignUp(SignUpDto body)
         {
             await _unitOfWork.BeginTransactionAsync();
             try
@@ -89,41 +87,9 @@ namespace familytree_api.Services.Auth
 
                 EmailMessage emailBody = new() { Subject = "Welcome To Family Tree", To = body.Email, ValidationToken = verificationToken.Code, Name = $"{user.FirstName} {user.LastName}" };
 
-                //Note: Due to azure not being able to handle my emails with my smtp host, i'll just send the email contents back to the frontend
-
-                //if (_env.IsProduction())
-                //{
-                //    var filePath = Path.Combine(_env.ContentRootPath, "Dtos", "Emails", "WelcomeEmail.html");
-                //    // Read the HTML template
-                //    var htmlContent = File.ReadAllText(filePath);
-
-                //    // Replace placeholders with dynamic content
-                //    htmlContent = htmlContent.Replace("{{client}}", emailBody.Name); // Replace with actual user name
-                //    htmlContent = htmlContent.Replace("{{validation_endpoint}}", $"{_frontEndURL.Value.Url}/verify-email?token={emailBody.ValidationToken}&email={emailBody.To}"); // Replace with actual link
-
-                //    // Connect to the Mailpit SMTP server
-                //    //if (_env.IsProduction())
-                //    //{
-                //    EmailOutput emailRequest = new ()
-                //    {
-                //        To = emailBody.To,
-                //        Subject = emailBody.Subject,
-                //        HtmlContent = htmlContent
-                //    };
-                //    await _eventDispatcher.DispatchAsync(emailBody);
-
-                //    return emailRequest;
-                //}
-                //else
-                //{
-                //await _eventDispatcher.DispatchAsync(emailBody);
-
-                //}
                 await _eventDispatcher.DispatchAsync(emailBody);
 
                 await _unitOfWork.CommitAsync();
-
-                return null;
             }
             catch
             {
