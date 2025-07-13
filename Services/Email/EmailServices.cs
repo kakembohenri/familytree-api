@@ -9,12 +9,11 @@ using System.Text.Json;
 
 namespace familytree_api.Services.Email
 {
-    public class EmailServices(IOptions<SmtpConfig> smtpConfig, IOptions<FrontEndUrl> frontEndURL, IWebHostEnvironment env, HttpClient httpClient) : IEmailServices
+    public class EmailServices(IOptions<SmtpConfig> smtpConfig, IOptions<FrontEndUrl> frontEndURL, IWebHostEnvironment env) : IEmailServices
     {
         private readonly SmtpConfig _smtpConfig = smtpConfig.Value;
         private readonly FrontEndUrl _frontEndURL = frontEndURL.Value;
         private readonly IWebHostEnvironment _env = env;
-        private readonly HttpClient _httpClient = httpClient;
 
         public async Task SendEmailVerfication(EmailMessage email)
         {
