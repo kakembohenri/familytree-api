@@ -93,7 +93,7 @@ namespace familytree_api.Services.Auth
 
                 if (_env.IsProduction())
                 {
-                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Dtos", "Emails", "WelcomeEmail.html");
+                    var filePath = Path.Combine(_env.ContentRootPath, "Dtos", "Emails", "WelcomeEmail.html");
                     // Read the HTML template
                     var htmlContent = File.ReadAllText(filePath);
 
@@ -110,6 +110,7 @@ namespace familytree_api.Services.Auth
                         Subject = emailBody.Subject,
                         HtmlContent = htmlContent
                     };
+                    await _eventDispatcher.DispatchAsync(emailBody);
 
                     return emailRequest;
                 }

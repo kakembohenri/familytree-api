@@ -22,7 +22,7 @@ namespace familytree_api.Services.Email
             {
                 using var smtp = new SmtpClient();
 
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Dtos", "Emails", "WelcomeEmail.html");
+                var filePath = Path.Combine(_env.ContentRootPath, "Dtos", "Emails", "WelcomeEmail.html");
                 // Read the HTML template
                 var htmlContent = File.ReadAllText(filePath);
 
@@ -31,44 +31,31 @@ namespace familytree_api.Services.Email
                 htmlContent = htmlContent.Replace("{{validation_endpoint}}", $"{_frontEndURL.Url}/verify-email?token={email.ValidationToken}&email={email.To}"); // Replace with actual link
 
                 // Connect to the Mailpit SMTP server
-                //if (_env.IsProduction())
-                //{
-                    var emailRequest = new
-                    {
-                        to = email.To,
-                        subject = email.Subject,
-                        htmlContent = htmlContent
-                    };
+                if (_env.IsProduction())
+                {
+                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.SslOnConnect);
+                    await smtp.AuthenticateAsync(_smtpConfig.UserName, _smtpConfig.Password);
+                }
+                else
+                {
+                    // Local development: use MailPit, Papercut, or log the email
+                    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
+                }
 
-                    var jsonContent = new StringContent(JsonSerializer.Serialize(emailRequest), Encoding.UTF8, "application/json");
+                // Create the email message
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress(_smtpConfig.FromName, _smtpConfig.From));
+                message.To.Add(new MailboxAddress(email.To, email.To));
+                message.Subject = email.Subject;
 
-                //await _httpClient.PostAsync($"{_frontEndURL.Url}/api/send-email", jsonContent);
-                await _httpClient.PostAsync("https://familytree-ui.vercel.app/api/send-email", jsonContent);
+                // Set the email body to the HTML content
+                message.Body = new TextPart("html") { Text = htmlContent };
 
-                //}
-                //else
-                //{
-                //    // Local development: use MailPit, Papercut, or log the email
-                //    await smtp.ConnectAsync(_smtpConfig.Host, _smtpConfig.Port, SecureSocketOptions.None);
+                // Send the email
+                await smtp.SendAsync(message);
 
-
-                //// Create the email message
-                //var message = new MimeMessage();
-                //message.From.Add(new MailboxAddress(_smtpConfig.FromName, _smtpConfig.From));
-                //message.To.Add(new MailboxAddress(email.To, email.To));
-                //message.Subject = email.Subject;
-
-
-
-                //// Set the email body to the HTML content
-                //message.Body = new TextPart("html") { Text = htmlContent };
-
-                //// Send the email
-                //await smtp.SendAsync(message);
-
-                //// Disconnect from the SMTP server
-                //await smtp.DisconnectAsync(true);
-                //}
+                // Disconnect from the SMTP server
+                await smtp.DisconnectAsync(true);
 
             }
             catch (Exception ex)
