@@ -1,10 +1,11 @@
 ﻿using familytree_api.Dtos.Auth;
+using familytree_api.Dtos.Emails;
 
 namespace familytree_api.Services.Auth
 {
     public interface IAuthService
     {
-        Task SignUp(SignUpDto body);
+        Task<EmailOutput?> SignUp(SignUpDto body);
         Task<string> SignIn(SignInDto body);
         Task<string> ValidateUserAccount(VerifyTokenDto body);
         Task<string> ResetPassword(ResetPasswordDto body);

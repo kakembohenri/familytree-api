@@ -16,8 +16,6 @@ namespace familytree_api.Services.Email
         private readonly IWebHostEnvironment _env = env;
         private readonly HttpClient _httpClient = httpClient;
 
-
-
         public async Task SendEmailVerfication(EmailMessage email)
         {
             try

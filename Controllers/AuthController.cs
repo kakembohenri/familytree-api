@@ -1,4 +1,5 @@
 ﻿using familytree_api.Dtos.Auth;
+using familytree_api.Dtos.Emails;
 using familytree_api.Services;
 using familytree_api.Services.Auth;
 using Microsoft.AspNetCore.Authorization;
@@ -16,9 +17,9 @@ namespace familytree_api.Controllers
         {
             try
             {
-                await _authService.SignUp(body);
+                var result = await _authService.SignUp(body);
 
-                return Ok(new ApiResponse<string>(data: "", message: "Signup successfull. We have sent you an email verification token via email inorder to verify you account", 
+                return Ok(new ApiResponse<EmailOutput?>(data: result, message: "Signup successfull. We have sent you an email verification token via email inorder to verify you account", 
                     statusCode: (int)HttpStatusCode.OK));
             }
             catch (Exception ex)
