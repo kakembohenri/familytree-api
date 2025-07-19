@@ -21,7 +21,8 @@ namespace familytree_api.Services.Family
         IPartnerRepository _partnerRepository,
         IPartnerService _partnerService,
         IFileRepository _fileRepository,
-        IFileService _fileService
+        IFileService _fileService,
+        IConfiguration _configuration
         ) : IFamilyService
     {
         public async Task<TreeOutputDto?> Tree()
@@ -258,7 +259,8 @@ namespace familytree_api.Services.Family
 
             foreach (var i in images)
             {
-                i.Path = $"https://localhost:7025/uploads/{i.Path}";
+                //i.Path = $"https://localhost:7025/uploads/{i.Path}";
+                i.Path = $"{_configuration["FileRepository"]}/{i.Path}";
                 if (i.Type == "avatar")
                 {
                     parentAvatar = i;
@@ -281,7 +283,8 @@ namespace familytree_api.Services.Family
 
                 foreach (var i in partnerImages)
                 {
-                    i.Path = $"https://localhost:7025/uploads/{i.Path}";
+                    //i.Path = $"https://localhost:7025/uploads/{i.Path}";
+                    i.Path = $"{_configuration["FileRepository"]}/{i.Path}";
                     if (i.Type == "avatar")
                     {
                         partnerAvatar = i;
@@ -355,7 +358,8 @@ namespace familytree_api.Services.Family
 
                     foreach (var i in childImages)
                     {
-                        i.Path = $"https://localhost:7025/uploads/{i.Path}";
+                        //i.Path = $"https://localhost:7025/uploads/{i.Path}";
+                        i.Path = $"{_configuration["FileRepository"]}/{i.Path}";
                         if (i.Type == "avatar")
                         {
                             childAvatar = i;

@@ -1,4 +1,5 @@
 ﻿
+using Azure.Storage.Blobs;
 using familytree_api.Database;
 using familytree_api.Dtos.Family;
 using familytree_api.Models;
@@ -6,13 +7,28 @@ using familytree_api.Repositories.File;
 
 namespace familytree_api.Services.Files
 {
-    public class FileService(
-        IFileRepository _fileRepository,
-        IUnitOfWork _unitOfWork
-        ) : IFileService
+    public class FileService : IFileService
     {
 
-        private readonly string _uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+        private readonly IFileRepository _fileRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly BlobServiceClient _blobServiceClient;
+        private readonly IWebHostEnvironment _env;
+        private readonly string _containerName = "familytree";
+
+        public FileService(
+            IFileRepository fileRepository,
+            IUnitOfWork unitOfWork,
+            IWebHostEnvironment env,
+            IConfiguration configuration) // Inject IConfiguration
+        {
+            _fileRepository = fileRepository;
+            _unitOfWork = unitOfWork;
+            _env = env;
+
+            var connectionString = configuration["AzureBlobStorage"]; // From appsettings.json
+            _blobServiceClient = new BlobServiceClient(connectionString);
+        }
 
         public async Task UploadFile(FileInputDto body)
         {
@@ -20,13 +36,37 @@ namespace familytree_api.Services.Files
             var file = body.File;
             int familyMemberId = body.FamilyMemberId;
 
+
             string timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmssfff"); // High precision timestamp
-                string newFileName = $"{timestamp}{Path.GetExtension(file?.FileName)}";
+            string newFileName = $"{timestamp}{Path.GetExtension(file?.FileName)}";
             try
             {
+                if (_env.IsDevelopment())
+                {
+                    string _uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
 
-                // Get file details
-                string filePath = Path.Combine(_uploadPath, newFileName);
+                    // Get file details
+                    string filePath = Path.Combine(_uploadPath, newFileName);
+
+                    // Save the file
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                }
+                else
+                {
+                    var containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
+                    await containerClient.CreateIfNotExistsAsync();
+
+                    var blobClient = containerClient.GetBlobClient(newFileName);
+
+                    using (var stream = file.OpenReadStream())
+                    {
+                        await blobClient.UploadAsync(stream, overwrite: true);
+                    }
+                }
 
                 Image newFile = new()
                 {
@@ -38,14 +78,8 @@ namespace familytree_api.Services.Files
 
                 await _fileRepository.Create(newFile);
 
-                // Save the file
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
 
                 // if oldfile is not zero i.e is provided, delte it
-
                 if(body.OldAvatar != 0)
                 {
                     await RemoveFile(body.OldAvatar);
@@ -57,7 +91,7 @@ namespace familytree_api.Services.Files
             {
                 await _unitOfWork.RollbackAsync();
 
-                DeleteFile(Path.Combine(_uploadPath, newFileName));
+                DeleteFile(newFileName);
 
                 throw;
             }
@@ -75,7 +109,7 @@ namespace familytree_api.Services.Files
 
                 await _fileRepository.Delete(id);
 
-                DeleteFile(Path.Combine(_uploadPath, file.Path));
+                DeleteFile(file.Path);
             }
             catch
             {
@@ -97,7 +131,7 @@ namespace familytree_api.Services.Files
                 foreach(var file in files)
                 {
                     await _fileRepository.Delete(file.Id);
-                    DeleteFile(Path.Combine(_uploadPath, file.Path));
+                    DeleteFile(file.Path);
                 }
 
             }
@@ -107,9 +141,18 @@ namespace familytree_api.Services.Files
             }
         }
 
-        private static void DeleteFile(string path)
+        private async void DeleteFile(string fileName)
         {
-            System.IO.File.Delete(path);
+            if (_env.IsDevelopment())
+            {
+                System.IO.File.Delete(fileName);
+            }
+            else
+            {
+                var containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
+                var blobClient = containerClient.GetBlobClient(fileName);
+                await blobClient.DeleteIfExistsAsync();
+            }
         }
     }
 }
