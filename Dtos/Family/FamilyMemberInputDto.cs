@@ -15,6 +15,7 @@
         public string? Died { get; set; }
         public int? FatherId { get; set; }
         public int? MotherId { get; set; }
+        public int? ChildId { get; set; }
         public bool ShowInTree { get; set; } = true;
         public string Gender { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.Now;

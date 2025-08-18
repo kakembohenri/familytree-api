@@ -27,7 +27,11 @@ namespace familytree_api.Services.Files
             _env = env;
 
             var connectionString = configuration["AzureBlobStorage"]; // From appsettings.json
-            _blobServiceClient = new BlobServiceClient(connectionString);
+
+            if (!_env.IsDevelopment())
+            {
+                _blobServiceClient = new BlobServiceClient(connectionString);
+            }
         }
 
         public async Task UploadFile(FileInputDto body)

@@ -78,7 +78,8 @@ namespace familytree_api.Services.Family
         /*
          * Create a user and a family member adding the family id of the currently loggedin user
          * Make sure that the loggedin user is of role admin
-         * 
+         * If child id is not null, create its mother with placeholder info add mother as partner of father, then finally
+         * update the child and add the mother and father as the parents
          */
         public async Task CreateFamilyMember(FamilyMemberInputDto body)
         {
@@ -110,7 +111,6 @@ namespace familytree_api.Services.Family
                 var result = await _userRepository.Create(user);
 
                 // Create family member instance
-
                 Models.FamilyMember familyMember = new()
                 {
                     UserId = user.Id,
@@ -127,7 +127,63 @@ namespace familytree_api.Services.Family
                     CreatedAt = body.CreatedAt
                 };
 
-                await _familyMemberRepository.Create(familyMember);  
+                await _familyMemberRepository.Create(familyMember);
+
+                if(body.ChildId != null)
+                {
+                    var child = await _familyMemberRepository.Find((int)body.ChildId);
+
+                    // Create mother
+                    Models.User userMother = new()
+                    {
+                        FirstName = $"{familyMember.User.FirstName}'s Partner",
+                        LastName = "",
+                        Role = UserRoles.Viewer.ToString(),
+                        Email = "",
+                        PhoneNumber = "",
+                        CreatedAt = DateTime.Now
+                    };
+
+                    var resultM = await _userRepository.Create(userMother);
+
+                    // Add mother as family member
+                    Models.FamilyMember familyMemberMother = new()
+                    {
+                        UserId = resultM.Id,
+                        FamilyId = loggedInUser.FamilyId,
+                        Born = "",
+                        Died = "",
+                        FatherId = null,
+                        MotherId = null,
+                        PlaceOfBirth = "",
+                        Occupation = "",
+                        Bio = "",
+                        Gender = "Female",
+                        ShowInTree = true,
+                        CreatedAt = body.CreatedAt
+                    };
+
+                    await _familyMemberRepository.Create(familyMemberMother);
+
+                    // Add mother as partner of this father
+                    Models.Partner partner = new()
+                    {
+                        HusbandId = familyMember.Id,
+                        WifeId = familyMemberMother.Id,
+                        Married = "",
+                        Divorced = "",
+                        CreatedAt = body.CreatedAt,
+                    };
+
+                    await _partnerRepository.Create(partner);
+
+                    // Update the child and add father and mother to it
+                    child.FatherId = familyMember.Id;
+                    child.MotherId = familyMemberMother.Id;
+
+                    await _familyMemberRepository.Update(child);
+                }
+
             }
             catch
             {

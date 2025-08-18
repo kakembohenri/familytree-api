@@ -77,6 +77,7 @@ namespace familytree_api.Repositories.FamilyMember
             return await _context.FamilyMember
                 .Where(fm => fm.ShowInTree == true)
                 .Where(fm => fm.FamilyId == familyId)
+                .Where(fm => fm.FatherId == null && fm.MotherId == null)
                 .Include(fm => fm.Father!)
                 .ThenInclude(fm => fm.User)
                 .Include(fm => fm.Mother!)

@@ -1,5 +1,4 @@
 ﻿using familytree_api.Database;
-using familytree_api.Dtos.AppSettings;
 using familytree_api.Dtos.Auth;
 using familytree_api.Dtos.Emails;
 using familytree_api.Dtos.Family;
@@ -11,7 +10,6 @@ using familytree_api.Repositories.User;
 using familytree_api.Services.Family;
 using familytree_api.Services.Token;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
 
 namespace familytree_api.Services.Auth
 {
