@@ -1,5 +1,5 @@
-﻿
-using Azure.Storage.Blobs;
+﻿using Amazon.S3;
+using Amazon.S3.Model;
 using familytree_api.Database;
 using familytree_api.Dtos.Family;
 using familytree_api.Models;
@@ -12,26 +12,27 @@ namespace familytree_api.Services.Files
 
         private readonly IFileRepository _fileRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly BlobServiceClient _blobServiceClient;
+        private readonly IAmazonS3 _s3Client;
         private readonly IWebHostEnvironment _env;
-        private readonly string _containerName = "familytree";
+        private readonly string _bucketName;
 
         public FileService(
             IFileRepository fileRepository,
             IUnitOfWork unitOfWork,
             IWebHostEnvironment env,
-            IConfiguration configuration) // Inject IConfiguration
+            IConfiguration configuration,
+            IAmazonS3 s3Client) // Inject IConfiguration
         {
             _fileRepository = fileRepository;
             _unitOfWork = unitOfWork;
             _env = env;
+            _s3Client = s3Client;
+            _bucketName = configuration["Backblaze:BucketName"] ?? "";
 
-            var connectionString = configuration["AzureBlobStorage"]; // From appsettings.json
-
-            if (!_env.IsDevelopment())
-            {
-                _blobServiceClient = new BlobServiceClient(connectionString);
-            }
+            // if (!_env.IsDevelopment())
+            // {
+            //     _blobServiceClient = new BlobServiceClient(connectionString);
+            // }
         }
 
         public async Task UploadFile(FileInputDto body)
@@ -39,38 +40,32 @@ namespace familytree_api.Services.Files
             await _unitOfWork.BeginTransactionAsync();
             var file = body.File;
             int familyMemberId = body.FamilyMemberId;
-
-
             string timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmssfff"); // High precision timestamp
             string newFileName = $"{timestamp}{Path.GetExtension(file?.FileName)}";
             try
             {
-                if (_env.IsDevelopment())
+                // if (_env.IsDevelopment())
+                // {
+                //     string _uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+                //     // Get file details
+                //     string filePath = Path.Combine(_uploadPath, newFileName);
+                //     // Save the file
+                //     using (var stream = new FileStream(filePath, FileMode.Create))
+                //     {
+                //         await file.CopyToAsync(stream);
+                //     }
+                // }
+                // else
+                // {
+                var uploadRequest = new PutObjectRequest
                 {
-                    string _uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
-
-                    // Get file details
-                    string filePath = Path.Combine(_uploadPath, newFileName);
-
-                    // Save the file
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await file.CopyToAsync(stream);
-                    }
-
-                }
-                else
-                {
-                    var containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
-                    await containerClient.CreateIfNotExistsAsync();
-
-                    var blobClient = containerClient.GetBlobClient(newFileName);
-
-                    using (var stream = file.OpenReadStream())
-                    {
-                        await blobClient.UploadAsync(stream, overwrite: true);
-                    }
-                }
+                    BucketName = _bucketName,
+                    Key = newFileName,
+                    InputStream = file.OpenReadStream(),
+                    ContentType = file.ContentType
+                };
+                await _s3Client.PutObjectAsync(uploadRequest);
+                // }
 
                 Image newFile = new()
                 {
@@ -81,22 +76,17 @@ namespace familytree_api.Services.Files
                 };
 
                 await _fileRepository.Create(newFile);
-
-
                 // if oldfile is not zero i.e is provided, delte it
-                if(body.OldAvatar != 0)
+                if (body.OldAvatar != 0)
                 {
                     await RemoveFile(body.OldAvatar);
                 }
-
                 await _unitOfWork.CommitAsync();
             }
             catch
             {
                 await _unitOfWork.RollbackAsync();
-
                 DeleteFile(newFileName);
-
                 throw;
             }
         }
@@ -132,7 +122,7 @@ namespace familytree_api.Services.Files
             {
                 var files = await _fileRepository.List(familyMemberId);
 
-                foreach(var file in files)
+                foreach (var file in files)
                 {
                     await _fileRepository.Delete(file.Id);
                     DeleteFile(file.Path);
@@ -153,9 +143,12 @@ namespace familytree_api.Services.Files
             }
             else
             {
-                var containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
-                var blobClient = containerClient.GetBlobClient(fileName);
-                await blobClient.DeleteIfExistsAsync();
+                var deleteRequest = new DeleteObjectRequest
+                {
+                    BucketName = _bucketName,
+                    Key = fileName
+                };
+                await _s3Client.DeleteObjectAsync(deleteRequest);
             }
         }
     }

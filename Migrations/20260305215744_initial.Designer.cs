@@ -12,8 +12,8 @@ using familytree_api.Database;
 namespace familytree_api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250603113012_father_and_mother_to_family_members")]
-    partial class father_and_mother_to_family_members
+    [Migration("20260305215744_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -62,6 +62,11 @@ namespace familytree_api.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Bio")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("bio");
+
                     b.Property<string>("Born")
                         .IsRequired()
                         .HasColumnType("longtext")
@@ -91,9 +96,15 @@ namespace familytree_api.Migrations
                         .HasColumnType("int")
                         .HasColumnName("mother_id");
 
-                    b.Property<int?>("ParentId")
-                        .HasColumnType("int")
-                        .HasColumnName("parent_id");
+                    b.Property<string>("Occupation")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("occupation");
+
+                    b.Property<string>("PlaceOfBirth")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("place_of_birth");
 
                     b.Property<bool>("ShowInTree")
                         .HasColumnType("tinyint(1)")
@@ -110,8 +121,6 @@ namespace familytree_api.Migrations
                     b.HasIndex("FatherId");
 
                     b.HasIndex("MotherId");
-
-                    b.HasIndex("ParentId");
 
                     b.HasIndex("UserId");
 
@@ -139,6 +148,11 @@ namespace familytree_api.Migrations
                         .IsRequired()
                         .HasColumnType("longtext")
                         .HasColumnName("path");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("type");
 
                     b.HasKey("Id");
 
@@ -288,10 +302,6 @@ namespace familytree_api.Migrations
                         .WithMany()
                         .HasForeignKey("MotherId");
 
-                    b.HasOne("familytree_api.Models.FamilyMember", "Parent")
-                        .WithMany()
-                        .HasForeignKey("ParentId");
-
                     b.HasOne("familytree_api.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -303,8 +313,6 @@ namespace familytree_api.Migrations
                     b.Navigation("Father");
 
                     b.Navigation("Mother");
-
-                    b.Navigation("Parent");
 
                     b.Navigation("User");
                 });
@@ -322,13 +330,13 @@ namespace familytree_api.Migrations
 
             modelBuilder.Entity("familytree_api.Models.Partner", b =>
                 {
-                    b.HasOne("familytree_api.Models.User", "Husband")
+                    b.HasOne("familytree_api.Models.FamilyMember", "Husband")
                         .WithMany()
                         .HasForeignKey("HusbandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("familytree_api.Models.User", "Wife")
+                    b.HasOne("familytree_api.Models.FamilyMember", "Wife")
                         .WithMany()
                         .HasForeignKey("WifeId")
                         .OnDelete(DeleteBehavior.Cascade)

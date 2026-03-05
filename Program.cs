@@ -1,3 +1,4 @@
+using Amazon.S3;
 using familytree_api;
 using familytree_api.Database;
 using familytree_api.Dtos.AppSettings;
@@ -30,6 +31,20 @@ builder.Services.AddCors(options =>
         });
 });
 
+builder.Services.AddSingleton<IAmazonS3>(sp =>
+{
+    var config = new AmazonS3Config
+    {
+        ServiceURL = builder.Configuration["Backblaze:ServiceURL"],
+        ForcePathStyle = true
+    };
+
+    return new AmazonS3Client(
+        builder.Configuration["Backblaze:KeyId"],
+        builder.Configuration["Backblaze:ApplicationKey"],
+        config
+    );
+});
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
@@ -90,9 +105,9 @@ app.UseMiddleware<JwtMiddleware>();
 //if (app.Environment.IsDevelopment())
 //{
 //}
-    app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI();
+app.MapOpenApi();
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
