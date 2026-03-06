@@ -37,10 +37,14 @@ jobs:
 
       - name: Copy published output to VPS
         run: |
-          rsync -avz --exclude '.git' ./publish/ kembos@${{ env.VPS_IP }}:/home/kembos/familytree/
+          rsync -avz \
+            --exclude '.git' \
+            --exclude 'appsettings.Development.json' \
+            --exclude 'appsettings.Production.json' \
+            ./publish/ kembos@${{ env.VPS_IP }}:/home/kembos/familytree/
 
-      # - name: Restart app on VPS
-      #   run: |
-      #     ssh kembos@${{ env.VPS_IP }} "
-      #       sudo systemctl restart pidmis-api
-      #     "
+      - name: Restart app on VPS
+        run: |
+          ssh kembos@${{ env.VPS_IP }} "
+            sudo supervisorctl restart familytree:familytree_00
+          "
