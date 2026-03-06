@@ -45,6 +45,4 @@ jobs:
 
       - name: Restart app on VPS
         run: |
-          ssh kembos@${{ env.VPS_IP }} "
-            sudo supervisorctl restart familytree:familytree_00
-          "
+          ssh kembos@${{ env.VPS_IP }} "sudo supervisorctl restart familytree:familytree_00"
