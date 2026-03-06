@@ -127,11 +127,10 @@ if (Directory.Exists(fullPath)) // Check if folder exists
     });
 }
 
-app.Run();
-
-// Auto-migrate on startup
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
 }
+
+app.Run();
