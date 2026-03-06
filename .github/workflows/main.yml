@@ -1,0 +1,46 @@
+name: Deploy .NET to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  VPS_IP: 207.180.246.179
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish app
+        run: |
+          dotnet publish --configuration Release --runtime linux-x64 --self-contained false --output ./publish
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Add VPS to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ env.VPS_IP }} >> ~/.ssh/known_hosts
+
+      - name: Copy published output to VPS
+        run: |
+          rsync -avz --exclude '.git' ./publish/ kembos@${{ env.VPS_IP }}:/home/kembos/familytree/
+
+      # - name: Restart app on VPS
+      #   run: |
+      #     ssh kembos@${{ env.VPS_IP }} "
+      #       sudo systemctl restart pidmis-api
+      #     "
