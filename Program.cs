@@ -62,6 +62,8 @@ builder.Services.AddServicesFromAssembly(Assembly.GetExecutingAssembly());
 // Bind SMTP configuration from appsettings.json
 builder.Services.Configure<SmtpConfig>(builder.Configuration.GetSection("SMTP"));
 
+builder.Services.Configure<ZeptoMailConfig>(builder.Configuration.GetSection("ZeptoMail"));
+
 // Bind Frontend URL configuration from appsettings.json
 builder.Services.Configure<FrontEndUrl>(builder.Configuration.GetSection("FrontEndUrl"));
 
